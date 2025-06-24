@@ -63,20 +63,30 @@ const PasswordManager = ({ user }) => {
   // Handle adding a new password
   const handleAddPassword = async (passwordData) => {
     try {
-      await addPassword(user.uid, {
+      setIsLoading(true);
+      
+      // Prepare the password data with required fields
+      const passwordToAdd = {
         ...passwordData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         favorite: false,
-      });
+        // Let the server set the timestamps
+      };
       
-      await loadPasswords();
-      setIsAddDialogOpen(false);
+      // Add the password to the database and get the complete password object
+      const addedPassword = await addPassword(user.uid, passwordToAdd);
       
+      // Update the local state with the new password
+      setPasswords(prevPasswords => [addedPassword, ...prevPasswords]);
+      
+      // Show success message
       toast({
         title: 'Success',
         description: 'Password added successfully!',
       });
+      
+      // Close the dialog
+      setIsAddDialogOpen(false);
+      
     } catch (error) {
       console.error('Error adding password:', error);
       toast({
@@ -84,6 +94,8 @@ const PasswordManager = ({ user }) => {
         description: 'Failed to add password. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -275,7 +287,7 @@ const PasswordManager = ({ user }) => {
             passwords={filteredPasswords}
             showPasswords={showPasswords}
             onEdit={(password) => {
-              setCurrentPassword(password);
+              setCurrentPassword(password);zzz
               setIsAddDialogOpen(true);
             }}
             onDelete={(password) => {

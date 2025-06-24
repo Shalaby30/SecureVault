@@ -204,7 +204,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-2">
-            SecureVault
+            Secure Vault
           </h1>
           <p className="text-slate-400">Your passwords, secured for ever</p>
         </div>
