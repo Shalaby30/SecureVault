@@ -9,8 +9,8 @@ import { Mail, Eye, EyeOff, Shield, Fingerprint, Key, Scan, Loader2, AlertCircle
 import { cn } from "../lib/utils"
 import { Plus } from "lucide-react"
 
-const LoginPage = () => {
-  const { signIn, signUp, updateUserProfile, sendPasswordReset: sendResetEmail, sendEmailVerification, login, signOut } = useAuth();
+export default function LoginPage() {
+  const { signIn, signUp, signInWithGoogle, updateUserProfile, sendPasswordReset: sendResetEmail, sendEmailVerification, signOut } = useAuth();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -96,17 +96,25 @@ const LoginPage = () => {
   }
 
   const handleGoogleSignIn = async () => {
-    setError("")
     try {
-      await signInWithGoogle()
-      // onLogin will be handled by AuthProvider's onAuthStateChanged
+      setIsLoading(true);
+      setError("");
+      const user = await signInWithGoogle();
+      if (user && !user.emailVerified) {
+        await signOut();
+        setError("Please verify your Google account email before logging in.");
+      }
     } catch (error) {
-      console.error("Error signing in with Google:", error)
-      setError(error.message || "Failed to sign in with Google.")
+      console.error("Error signing in with Google:", error);
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        setError('An account already exists with the same email but different sign-in credentials.');
+      } else {
+        setError(error.message || "Failed to sign in with Google.");
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault()
@@ -559,5 +567,3 @@ const LoginPage = () => {
     </div>
   )
 }
-
-export default LoginPage

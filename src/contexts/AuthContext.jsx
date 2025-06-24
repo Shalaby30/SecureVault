@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail as sendFirebasePasswordResetEmail,
+  sendEmailVerification as firebaseSendEmailVerification,
   updateProfile as updateFirebaseProfile
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
@@ -28,7 +29,8 @@ export function AuthProvider({ children }) {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      return result.user; // Return the user object directly
     } catch (error) {
       console.error("Error signing in with Google:", error);
       throw error;
@@ -46,9 +48,19 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return { user: userCredential.user };
     } catch (error) {
       console.error("Error signing in:", error);
+      throw error;
+    }
+  };
+  
+  const sendEmailVerification = async (user) => {
+    try {
+      await firebaseSendEmailVerification(user);
+    } catch (error) {
+      console.error("Error sending email verification:", error);
       throw error;
     }
   };
@@ -91,7 +103,8 @@ export function AuthProvider({ children }) {
     signUp,
     signOut,
     updateUserProfile,
-    sendPasswordReset
+    sendPasswordReset,
+    sendEmailVerification
   };
 
   return (
