@@ -10,6 +10,7 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     title: '',
     username: '',
+    email: '',
     password: '',
     website: '',
     notes: '',
@@ -20,13 +21,26 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
 
   useEffect(() => {
     if (initialData) {
+      // If editing an existing password, set the form data
       setFormData({
         title: initialData.title || '',
         username: initialData.username || '',
+        email: initialData.email || '',
         password: initialData.password || '',
         website: initialData.website || '',
         notes: initialData.notes || '',
         category: initialData.category || 'Personal',
+      })
+    } else {
+      // If creating a new password, reset the form
+      setFormData({
+        title: '',
+        username: '',
+        email: '',
+        password: '',
+        website: '',
+        notes: '',
+        category: 'Personal',
       })
     }
   }, [initialData])
@@ -76,7 +90,33 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
       })
       return
     }
-    onSave(formData)
+    
+    // Create a new object with the form data
+    const formDataToSave = { ...formData };
+    
+    // If both username and email are provided, save both
+    // If only one is provided, save that one
+    // This ensures we don't lose any data
+    if (formData.email && formData.username) {
+      // Both fields have values, save both
+      formDataToSave.username = formData.username;
+      formDataToSave.email = formData.email;
+    } else if (formData.email) {
+      // Only email is provided, save as username
+      formDataToSave.username = formData.email;
+      delete formDataToSave.email;
+    } else if (formData.username) {
+      // Only username is provided, save as is
+      formDataToSave.username = formData.username;
+      delete formDataToSave.email;
+    } else {
+      // No username or email provided
+      formDataToSave.username = '';
+      delete formDataToSave.email;
+    }
+    
+    // Call the onSave callback with the form data
+    onSave(formDataToSave)
   }
 
   return (
@@ -95,13 +135,25 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="username">Username/Email</Label>
+          <Label htmlFor="username">Username</Label>
           <Input
             id="username"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="username@example.com"
+            placeholder="username"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="email">Email (optional)</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="email@example.com"
           />
         </div>
 

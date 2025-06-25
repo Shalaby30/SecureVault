@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getPasswords, addPassword, updatePassword, deletePassword } from '../../lib/passwordService';
+import { getPasswords, addPassword, updatePassword, deletePassword } from '../../services/passwordService';
 import { toast } from '../../lib/use-toast';
 import PasswordList from './PasswordList';
 import PasswordForm from './PasswordForm';
