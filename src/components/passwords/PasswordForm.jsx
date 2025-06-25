@@ -1,123 +1,86 @@
-import { useState, useEffect } from 'react'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
-import { Textarea } from '../ui/textarea'
-import { generatePassword } from '../../lib/utils'
-import { toast } from '../../lib/use-toast'
+import { useState, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { generatePassword } from '../../lib/utils';
+import { toast } from '../../lib/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 const PasswordForm = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     title: '',
-    username: '',
     email: '',
+    username: '',
     password: '',
     website: '',
     notes: '',
     category: 'Personal',
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (initialData) {
-      // If editing an existing password, set the form data
       setFormData({
         title: initialData.title || '',
-        username: initialData.username || '',
         email: initialData.email || '',
+        username: initialData.username || '',
         password: initialData.password || '',
         website: initialData.website || '',
         notes: initialData.notes || '',
         category: initialData.category || 'Personal',
-      })
-    } else {
-      // If creating a new password, reset the form
-      setFormData({
-        title: '',
-        username: '',
-        email: '',
-        password: '',
-        website: '',
-        notes: '',
-        category: 'Personal',
-      })
+      });
     }
-  }, [initialData])
+  }, [initialData]);
 
   const handleGeneratePassword = () => {
-    setIsGenerating(true)
-    // Generate a strong password with 16 characters
-    const password = generatePassword(16)
+    setIsGenerating(true);
+    const password = generatePassword(16);
     setFormData(prev => ({
       ...prev,
-      password: password
-    }))
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(password)
+      password
+    }));
+    navigator.clipboard.writeText(password);
     toast({
       title: "Password generated and copied",
       description: "The generated password has been copied to your clipboard.",
-    })
-    
-    setIsGenerating(false)
-  }
+    });
+    setIsGenerating(false);
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
+
     if (!formData.title) {
       toast({
         title: "Error",
         description: "Title is required",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
+
     if (!formData.password) {
       toast({
         title: "Error",
         description: "Password is required",
         variant: "destructive"
-      })
-      return
+      });
+      return;
     }
-    
-    // Create a new object with the form data
-    const formDataToSave = { ...formData };
-    
-    // If both username and email are provided, save both
-    // If only one is provided, save that one
-    // This ensures we don't lose any data
-    if (formData.email && formData.username) {
-      // Both fields have values, save both
-      formDataToSave.username = formData.username;
-      formDataToSave.email = formData.email;
-    } else if (formData.email) {
-      // Only email is provided, save as username
-      formDataToSave.username = formData.email;
-      delete formDataToSave.email;
-    } else if (formData.username) {
-      // Only username is provided, save as is
-      formDataToSave.username = formData.username;
-      delete formDataToSave.email;
-    } else {
-      // No username or email provided
-      formDataToSave.username = '';
-      delete formDataToSave.email;
-    }
-    
-    // Call the onSave callback with the form data
-    onSave(formDataToSave)
-  }
+
+    onSave({ ...formData });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -133,7 +96,7 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="username">Username</Label>
           <Input
@@ -144,9 +107,9 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
             placeholder="username"
           />
         </div>
-        
+
         <div className="space-y-2">
-          <Label htmlFor="email">Email (optional)</Label>
+          <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             name="email"
@@ -156,24 +119,24 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
             placeholder="email@example.com"
           />
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="Personal">Personal</option>
-            <option value="Work">Work</option>
-            <option value="Finance">Finance</option>
-            <option value="Social">Social</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <select
+          id="category"
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+        >
+          <option value="Personal">Personal</option>
+          <option value="Work">Work</option>
+          <option value="Finance">Finance</option>
+          <option value="Social">Social</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
 
       <div className="space-y-2">
@@ -203,9 +166,13 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-foreground"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
           >
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
@@ -255,7 +222,7 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
         </Button>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default PasswordForm
+export default PasswordForm;

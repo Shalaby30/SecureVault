@@ -155,9 +155,11 @@ const HomePage = () => {
   const [editingPassword, setEditingPassword] = useState(null)
   const [activeView, setActiveView] = useState("dashboard")
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [newPassword, setNewPassword] = useState({
     name: "",
     username: "",
+    email: "",
     password: "",
     url: "",
     category: "personal",
@@ -215,6 +217,7 @@ const HomePage = () => {
     setNewPassword({
       name: "",
       username: "",
+      email: "",
       password: "",
       url: "",
       category: "personal",
@@ -228,6 +231,7 @@ const HomePage = () => {
     setNewPassword({
       name: password.name,
       username: password.username,
+      email: password.email || "",
       password: password.password,
       url: password.url,
       category: password.category,
@@ -508,31 +512,59 @@ const HomePage = () => {
                 className="bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400"
               />
             </div>
-            <div className="grid gap-2">
-              <Label className="text-white" htmlFor="username">
-                Username/Email
-              </Label>
-              <Input
-                id="username"
-                value={newPassword.username}
-                onChange={(e) => setNewPassword((prev) => ({ ...prev, username: e.target.value }))}
-                placeholder="username or email"
-                className="bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="text-white" htmlFor="username">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  value={newPassword.username || ''}
+                  onChange={(e) => setNewPassword((prev) => ({ ...prev, username: e.target.value }))}
+                  placeholder="username"
+                  className="bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-white" htmlFor="email">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newPassword.email || ''}
+                  onChange={(e) => setNewPassword((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="email@example.com"
+                  className="bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label className="text-white" htmlFor="password">
                 Password
               </Label>
               <div className="flex gap-2">
-                <Input
-                  id="password"
-                  type="password"
-                  value={newPassword.password}
-                  onChange={(e) => setNewPassword((prev) => ({ ...prev, password: e.target.value }))}
-                  placeholder="Enter password"
-                  className="bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400"
-                />
+                <div className="relative flex-1">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={newPassword.password}
+                    onChange={(e) => setNewPassword((prev) => ({ ...prev, password: e.target.value }))}
+                    placeholder="Enter password"
+                    className="w-full bg-slate-800/80 border-slate-600/50 text-white placeholder:text-slate-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
                 <Button type="button" variant="outline" onClick={generatePassword}>
                   <RefreshCw className="w-4 h-4" />
                 </Button>

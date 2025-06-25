@@ -18,7 +18,6 @@ const PasswordManager = ({ user }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState(null);
 
-  // Load passwords from the database
   const loadPasswords = useCallback(async () => {
     if (!user?.uid) return;
     
@@ -38,12 +37,10 @@ const PasswordManager = ({ user }) => {
     }
   }, [user?.uid]);
 
-  // Load passwords on component mount and when user changes
   useEffect(() => {
     loadPasswords();
   }, [loadPasswords]);
 
-  // Filter passwords based on search query and category
   const filteredPasswords = passwords.filter(password => {
     const matchesSearch = password.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (password.username && password.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -55,36 +52,28 @@ const PasswordManager = ({ user }) => {
     return matchesSearch && matchesCategory;
   });
 
-  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPasswords(prev => !prev);
   };
 
-  // Handle adding a new password
   const handleAddPassword = async (passwordData) => {
     try {
       setIsLoading(true);
       
-      // Prepare the password data with required fields
       const passwordToAdd = {
         ...passwordData,
         favorite: false,
-        // Let the server set the timestamps
       };
       
-      // Add the password to the database and get the complete password object
       const addedPassword = await addPassword(user.uid, passwordToAdd);
       
-      // Update the local state with the new password
       setPasswords(prevPasswords => [addedPassword, ...prevPasswords]);
       
-      // Show success message
       toast({
         title: 'Success',
         description: 'Password added successfully!',
       });
       
-      // Close the dialog
       setIsAddDialogOpen(false);
       
     } catch (error) {
@@ -99,13 +88,9 @@ const PasswordManager = ({ user }) => {
     }
   };
 
-  // Handle updating a password
   const handleUpdatePassword = async (passwordData) => {
     try {
-      await updatePassword(user.uid, passwordData.id, {
-        ...passwordData,
-        updatedAt: new Date().toISOString(),
-      });
+      await updatePassword(user.uid, passwordData.id, passwordData);
       
       await loadPasswords();
       setCurrentPassword(null);
@@ -124,7 +109,6 @@ const PasswordManager = ({ user }) => {
     }
   };
 
-  // Handle deleting a password
   const handleDeletePassword = async () => {
     if (!currentPassword) return;
     
@@ -149,7 +133,6 @@ const PasswordManager = ({ user }) => {
     }
   };
 
-  // Toggle favorite status of a password
   const toggleFavorite = async (passwordId, currentStatus) => {
     try {
       const password = passwords.find(p => p.id === passwordId);
@@ -172,7 +155,6 @@ const PasswordManager = ({ user }) => {
     }
   };
 
-  // Get unique categories from passwords
   const categories = ['all', ...new Set(passwords.map(p => p.category).filter(Boolean))];
 
   return (

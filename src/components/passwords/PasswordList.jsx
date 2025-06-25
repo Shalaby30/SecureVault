@@ -88,7 +88,6 @@ const PasswordForm = ({ initialData, onSave, onCancel }) => {
       return
     }
 
-    // Save all fields directly
     onSave({ ...formData })
   }
 
