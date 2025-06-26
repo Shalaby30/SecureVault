@@ -78,7 +78,9 @@ export function AuthProvider({ children }) {
         
         // Sign out the user since email is not verified
         await firebaseSignOut(auth);
-        throw new Error('EMAIL_NOT_VERIFIED');
+        const verificationError = new Error('Please verify your email before signing in. A new verification email has been sent.');
+        verificationError.code = 'auth/email-not-verified';
+        throw verificationError;
       }
       
       return { user: userCredential.user };
@@ -89,14 +91,16 @@ export function AuthProvider({ children }) {
       let errorMessage = 'An error occurred during sign in. Please try again.';
       
       switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'No user found with this email address.';
-          break;
+        case 'auth/invalid-credential':
         case 'auth/wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
+        case 'auth/user-not-found':
+          errorMessage = 'Invalid email or password. Please try again.';
           break;
         case 'auth/too-many-requests':
-          errorMessage = 'Too many failed login attempts. Please try again later or reset your password.';
+          errorMessage = 'Access to this account has been temporarily disabled due to many failed login attempts. Please try again later or reset your password.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled. Please contact support.';
           break;
         case 'auth/user-disabled':
           errorMessage = 'This account has been disabled. Please contact support.';

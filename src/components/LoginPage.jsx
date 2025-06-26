@@ -90,14 +90,12 @@ export default function LoginPage() {
       // If signIn is successful, the user will be redirected by the auth state listener
     } catch (error) {
       // Handle specific error cases
-      if (error.message === 'EMAIL_NOT_VERIFIED') {
+      if (error.code === 'auth/email-not-verified') {
         setError('Email not verified')
-        setSuccess('We\'ve sent a new verification email. Please check your inbox (including spam folder) and click the verification link before signing in.')
-      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        setError('Invalid email or password. Please try again.')
-      } else if (error.code === 'auth/too-many-requests') {
-        setError('Too many failed login attempts. Please try again later or reset your password.')
+        setSuccess(error.message || 'We\'ve sent a new verification email. Please check your inbox (including spam folder) and click the verification link before signing in.')
       } else {
+        // For all other errors, use the message from the error object
+        // which now includes our friendly messages from AuthContext
         setError(error.message || 'Failed to sign in. Please try again.')
       }
     } finally {
