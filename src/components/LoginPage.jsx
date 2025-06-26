@@ -43,28 +43,37 @@ export default function LoginPage() {
 
     setIsLoading(true)
     try {
-      const { user } = await signUp(email, password)
+      // Sign up the user (this now includes sending verification email)
+      await signUp(email, password)
+      
+      // Update profile if name is provided
       if (name) {
-        await updateUserProfile({ displayName: name })
+        try {
+          await updateUserProfile({ displayName: name })
+        } catch (profileError) {
+          console.error("Error updating profile:", profileError)
+          // Don't fail the whole flow if profile update fails
+        }
       }
-      // Send email verification
-      await sendEmailVerification(user)
-      setSuccess("Registration successful! Please check your email to verify your account.")
-      setLoginMethod("email") // Switch back to login form
-      setEmail("")
+      
+      // Clear sensitive data but keep email for login
       setPassword("")
       setConfirmPassword("")
       setName("")
+      
+      // Show success message with instructions
+      setSuccess("✓ Registration successful! We've sent a verification email to your address. Please check your inbox (including spam folder) and click the verification link to activate your account.")
+      
+      // Switch to login tab after a short delay to show the success message
+      setTimeout(() => {
+        setLoginMethod("password")
+        // Clear success message after switching tabs
+        setTimeout(() => setSuccess(""), 10000) // Clear after 10 seconds
+      }, 2000)
+      
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists. Please try logging in instead.')
-      } else if (error.code === 'auth/weak-password') {
-        setError('Password is too weak. Please choose a stronger password.')
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Please enter a valid email address.')
-      } else {
-        setError(error.message || 'Failed to create an account. Please try again.')
-      }
+      // The error is already formatted in AuthContext
+      setError(error.message || 'Failed to create an account. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -73,17 +82,18 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
     setIsLoading(true)
     
     try {
-      const { user } = await signIn(email, password)
-      if (!user.emailVerified) {
-        setError("Please verify your email before logging in. Check your inbox for the verification link.")
-        await signOut()
-        return
-      }
+      await signIn(email, password)
+      // If signIn is successful, the user will be redirected by the auth state listener
     } catch (error) {
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      // Handle specific error cases
+      if (error.message === 'EMAIL_NOT_VERIFIED') {
+        setError('Email not verified')
+        setSuccess('We\'ve sent a new verification email. Please check your inbox (including spam folder) and click the verification link before signing in.')
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         setError('Invalid email or password. Please try again.')
       } else if (error.code === 'auth/too-many-requests') {
         setError('Too many failed login attempts. Please try again later or reset your password.')
@@ -221,7 +231,7 @@ export default function LoginPage() {
             )}
           >
             <Mail className="w-4 h-4 mx-auto mb-1" />
-            Email
+            Sign In
           </button>
           <button
             onClick={() => setLoginMethod("signup")}
@@ -385,9 +395,22 @@ export default function LoginPage() {
                   </div>
                 )}
                 {success && loginMethod === "signup" && (
-                  <div className="bg-green-500/10 border border-green-500/30 text-green-300 text-sm p-3 rounded-lg flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span>{success}</span>
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <CheckCircle className="w-5 h-5 text-green-400" />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-green-300 font-medium">Verification Email Sent!</h3>
+                        <div className="mt-1 text-sm text-green-200">
+                          <p>We've sent a verification link to your email address.</p>
+                          <p className="mt-2 font-semibold">Please check your inbox and click the link to verify your account.</p>
+                          <p className="mt-2 text-xs text-green-300/80">
+                            <span className="font-medium">Note:</span> The email might be in your spam or junk folder.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
                 

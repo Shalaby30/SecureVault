@@ -64,63 +64,63 @@ import {
 } from "lucide-react"
 import { cn } from "../lib/utils"
 
+// Bottom Navigation Bar Component for Mobile
+const BottomNav = ({ activeView, setActiveView }) => {
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
+  
+  const navItems = [
+    { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { id: 'vault', icon: <LockKeyhole size={20} />, label: 'Vault' },
+    { id: 'generator', icon: <KeyRound size={20} />, label: 'Generator' },
+  ]
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/50 md:hidden z-50">
+      <div className="flex justify-around items-center h-16">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveView(item.id)}
+            className={`flex flex-col items-center justify-center w-full h-full transition-colors duration-200 ${
+              activeView === item.id 
+                ? 'text-blue-400' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <div className={`p-1.5 rounded-lg ${
+              activeView === item.id 
+                ? 'bg-blue-500/20' 
+                : 'bg-transparent'
+            }`}>
+              {React.cloneElement(item.icon, {
+                className: `w-5 h-5 ${activeView === item.id ? 'text-blue-400' : 'text-slate-400'}`
+              })}
+            </div>
+            <span className="text-xs mt-0.5">{item.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            signOut()
+            navigate('/')
+          }}
+          className="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-red-400 transition-colors duration-200"
+        >
+          <div className="p-1.5 rounded-lg hover:bg-red-500/10">
+            <LogOut className="w-5 h-5" />
+          </div>
+          <span className="text-xs mt-0.5">Logout</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // Default categories that will be available for selection
 const defaultCategories = ["personal", "work", "social", "email", "banking"]
 
-const mockPasswords = [
-  {
-    id: "1",
-    name: "Gmail",
-    username: "john.doe@gmail.com",
-    password: "MyStr0ng!Pass123",
-    url: "https://gmail.com",
-    category: "email",
-    notes: "Primary email account",
-    favorite: true,
-    lastUsed: "2 hours ago",
-    strength: 85,
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "GitHub",
-    username: "johndoe",
-    password: "C0d3r!2024#Secure",
-    url: "https://github.com",
-    category: "work",
-    notes: "Development account",
-    favorite: false,
-    lastUsed: "1 day ago",
-    strength: 92,
-    createdAt: "2024-02-01",
-  },
-  {
-    id: "3",
-    name: "Netflix",
-    username: "john.doe@gmail.com",
-    password: "Movie!Night2024",
-    url: "https://netflix.com",
-    category: "personal",
-    notes: "Family subscription",
-    favorite: true,
-    lastUsed: "3 days ago",
-    strength: 78,
-    createdAt: "2024-01-20",
-  },
-  {
-    id: "4",
-    name: "Chase Bank",
-    username: "johndoe123",
-    password: "Bank!Secure#2024$",
-    url: "https://chase.com",
-    category: "banking",
-    notes: "Primary checking account",
-    favorite: false,
-    lastUsed: "1 week ago",
-    strength: 95,
-    createdAt: "2024-01-10",
-  },
-]
+
 
 const sidebarItems = [
   { 
@@ -432,10 +432,10 @@ const HomePage = () => {
       {/* Main Content */}
       <div className="lg:ml-80 relative z-10">
         {/* Top Bar */}
-        <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-slate-800/50">
+        <div className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-lg border-b border-slate-800/50">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+              <Button variant="ghost" size="sm" className="hidden lg:flex" onClick={() => setSidebarOpen(true)}>
                 <Menu className="w-4 h-4" />
               </Button>
               <div>
@@ -489,6 +489,9 @@ const HomePage = () => {
           {activeView === "generator" && <GeneratorView />}
         </div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav activeView={activeView} setActiveView={setActiveView} />
 
       {/* Add Password Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

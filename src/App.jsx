@@ -1,5 +1,6 @@
 "use client"
 
+import { BrowserRouter as Router, unstable_HistoryRouter as HistoryRouter } from "react-router-dom"
 import { AuthProvider, useAuth } from "./contexts/AuthContext"
 import { Toaster } from "./components/ui/toaster"
 import LoginPage from "./components/LoginPage"
@@ -29,10 +30,20 @@ function AppContent() {
   )
 }
 
+// Create a custom history object to access the router
+const routerConfig = {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+}
+
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router {...routerConfig}>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
   )
 }
